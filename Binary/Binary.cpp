@@ -1,4 +1,6 @@
 #include "Binary.h"
+#include "FText.h"
+#include <iomanip>
 
 #pragma region BIN
 Bin::Bin() : bin(nullptr)
@@ -297,7 +299,207 @@ int Bin::ToDecimal() const
 	return result;
 }
 
+void Bin::SimulateManualDivision(Bin bin_1, Bin bin_2)
+{
+	//Mo phong phep chia bang tay
+	cout << fc(F_LIGHT_CYAN) << "==*== SIMULATE MANUAL DIVISION ==*==" << fc::Reset << endl;
 
+	cout << "DEVIDENT: " << fc(F_LIGHT_RED) << bin_1.bin << " (" << bin_1.ToDecimal() << ')' << fc::Reset << endl;
+	cout << "DIVISOR: " << fc(F_LIGHT_RED) << bin_2.bin << " (" << bin_2.ToDecimal() << ')' << fc::Reset << endl;
+
+	int k = 8;
+	Bin A(0);
+	cout << fc(F_GREEN) << "Declare A = 0: " << fc(F_CYAN) << A << fc::Reset << endl;
+	cout << fc(F_GREEN) << "Declare Q " << fc(F_YELLOW) << "(If Divident is positive, keep the number as is,\nbut if it is negative, takes the 2's complement.): ";
+	Bin Q((bin_1.bin[0] == '0') ? bin_1 : ~(bin_1 - Bin(1)));
+	cout << fc(F_CYAN) << Q << fc::Reset << endl;
+	Bin M(bin_2);
+	cout << fc(F_GREEN) << "Declare M" << fc(F_YELLOW) << " (is Divisor) : " << fc(F_CYAN) << M << fc::Reset << endl;
+
+	Bin temp;
+	cout << fc(F_LIGHT_CYAN) << "\nSTART THE LOOP " << fc::Reset << endl;
+	cout << fc(F_LIGHT_YELLOW) << setw(15) << left << "A" << setw(15) << left << "Q" << fc::Reset << endl;
+	cout << fc(F_LIGHT_BLUE) << setw(15) << left << A << setw(15) << left << Q << fc::Reset << endl << endl;
+	while (k > 0)
+	{
+		A = A << 1;
+		A.bin[7] = Q.bin[0];
+		Q = Q << 1;
+		temp = A;
+
+		cout << fc(F_LIGHT_BLUE) << setw(15) << left << A << setw(15) << left << Q << fc(F_LIGHT_GREEN) << setw(15) << left << "Shift" << endl;
+
+		if (A.bin[0] == M.bin[0]) { A = A - M; 
+			cout << fc(F_LIGHT_BLUE) << setw(15) << left << A << setw(15) << left << Q << fc(F_LIGHT_GREEN) << setw(15) << left << "A = A - M" << fc(F_RED) << "(A[0] == M[0])" << endl;
+		}
+		else {
+			A = A + M; 
+			cout << fc(F_LIGHT_BLUE) << setw(15) << left << A << setw(15) << left << Q << fc(F_LIGHT_GREEN) << setw(15) << left << "A = A + M" << fc(F_RED) << "(A[0] != M[0])" << endl;
+		}
+
+
+		if (A.bin[0] == temp.bin[0]) Q.bin[7] = '1';
+		else
+		{
+			Q.bin[7] = '0';
+			//restore A
+			A = temp;
+			cout << fc(F_LIGHT_BLUE) << setw(15) << left << A << setw(15) << left << Q << fc(F_LIGHT_GREEN) << setw(15) << left << "Restore A"
+				<< fc(F_RED) << "bit[0] of A" << fc(F_LIGHT_GREEN) << " isn't the same as " << fc(F_RED) << "bit[0] of previous A" << endl;
+		}
+		cout << endl;
+		k--;
+	}
+
+	cout << fc(F_LIGHT_YELLOW) << "--> Q: " << fc(F_LIGHT_BLUE) << Q << endl;
+	cout << fc(F_LIGHT_YELLOW) << "--> A: " << fc(F_LIGHT_BLUE) << A << endl;
+
+	cout << fc(F_YELLOW) << "If sign of divident is the same as the divisor, then keep it is as,\notherwise take the two's complement of Q." << endl;
+
+	if (bin_1[0] != bin_2[0])
+	{
+		cout << fc(F_LIGHT_CYAN) << "\nQUOTIENT: " << ~Q + Bin(1) << " (" << (~Q + Bin(1)).ToDecimal() << ')' << endl;
+	}
+	else
+		cout << fc(F_LIGHT_CYAN) << "\nQUOTIENT: " << Q << " (" << Q.ToDecimal() << ')' << endl;
+
+	cout << fc(F_LIGHT_RED) << "REMAINDER: " << A << " (" << A.ToDecimal() << ')' << fc::Reset << endl;
+
+	cout << fc::Reset << endl;
+}
+
+void Bin::SimulateManualMultiplication(Bin bin_1, Bin bin_2)
+{
+	cout << fc(F_LIGHT_CYAN) << "==*== SIMULATE MANUAL MULTIPLICATION ==*==" << fc::Reset << endl;
+
+	cout << "FACTOR 1: " << fc(F_LIGHT_RED) << bin_1.bin << " (" << bin_1.ToDecimal() << ')' << fc::Reset << endl;
+	cout << "FACTOR 2: " << fc(F_LIGHT_RED) << bin_2.bin << " (" << bin_2.ToDecimal() << ')' << fc::Reset << endl;
+	int k = 8;
+	char Qs = '0';
+	cout << fc(F_GREEN) << "Declare Qs: " << fc(F_CYAN) << "0" << endl;
+	Bin A(0);
+	cout << fc(F_GREEN) << "Declare A = 0: " << fc(F_CYAN) << A << fc::Reset << endl;
+	Bin Q(bin_1);
+	cout << fc(F_GREEN) << "Declare Q = Factor 1: " << fc(F_CYAN) << Q << fc::Reset << endl;
+	cout << fc(F_GREEN) << "Declare M = Factor 2: " << fc(F_CYAN) << bin_2 << fc::Reset << endl;
+	Bin temp(bin_2);
+
+	cout << fc(F_LIGHT_CYAN) << "\nSTART THE LOOP " << fc::Reset << endl;
+
+	cout << "A = A - M if Q0-Qs = 01 or Q0-Qs = 10" << endl;
+
+	cout << fc(F_LIGHT_YELLOW) << setw(5) << left << "k" << setw(15)
+		<< left << "Operation" << setw(15) << left << "A" << setw(15) << left << "Q" <<
+		setw(15) << left << "Qs" << setw(15) << left << "M" << fc::Reset << endl;
+
+	cout << setw(5) << left << ' ' << setw(15)
+		<< left << fc(F_LIGHT_RED) << "Initialize" << fc(F_LIGHT_BLUE) << setw(15) << left << A << setw(15) << left << Q <<
+		setw(15) << left << Qs << setw(15) << left << temp << fc::Reset << endl;
+
+	while (k > 0)
+	{
+		if (Q.bin[7] == '1' && Qs == '0')
+		{
+			A = A - temp;
+			cout << fc(F_LIGHT_GREEN) << setw(5) << left << k << setw(15)
+				<< left << fc(F_LIGHT_PURPLE) << "A = A - M" << fc(F_LIGHT_BLUE) << setw(15) << left << A << setw(15) << left << Q <<
+				setw(15) << left << Qs << setw(15) << left << temp << fc::Reset << endl;
+		}
+		else if (Q.bin[7] == '0' && Qs == '1')
+		{
+			A = A + temp;
+			cout << fc(F_LIGHT_GREEN) << setw(5) << left << k << setw(15)
+				<< left << fc(F_LIGHT_PURPLE) << "A = A + M" << fc(F_LIGHT_BLUE) << setw(15) << left << A << setw(15) << left << Q <<
+				setw(15) << left << Qs << setw(15) << left << temp << fc::Reset << endl;
+		}
+
+		Qs = Q.bin[7];
+		Q = Q >> 1;
+		Q.bin[0] = A.bin[7];
+		A = A >> 1;
+		
+
+		cout << fc(F_LIGHT_GREEN) << setw(5) << left << k << setw(15)
+			<< left << fc(F_LIGHT_PURPLE) << "SAR" << fc(F_LIGHT_BLUE) << setw(15) << left << A << setw(15) << left << Q <<
+			setw(15) << left << Qs << setw(15) << left << temp << fc::Reset << endl;
+		k--;
+	}
+
+	cout << fc(F_LIGHT_CYAN) << "\nRESULT: " << Q << " (" << Q.ToDecimal() << ')' << endl;
+}
+
+void Bin::SimulateManualAddition(Bin bin_1, Bin bin_2)
+{
+	int sd = 0;
+	char* result = new char[9] {"00000000"};
+	bool ts = false;
+
+	cout << fc(F_LIGHT_CYAN) << "==*== SIMULATE MANUAL ADDITION ==*==" << fc::Reset << endl;
+	cout << "TERM 1: " << fc(F_LIGHT_RED) << bin_1.bin << " (" << bin_1.ToDecimal() << ')' << fc::Reset << endl;
+	cout << "TERM 2: " << fc(F_LIGHT_RED) << bin_2.bin << " (" << bin_2.ToDecimal() << ')' << fc::Reset << endl;
+	cout << fc(F_LIGHT_YELLOW) << setw(15) << left << "A" << setw(15) << left << "B" << setw(15) << left << "Cin" << setw(15) << left << "Sum" << setw(15) << left << "Cout" << fc::Reset << endl;
+	for (int i = 7; i >= 0; i--)
+	{
+		//cout << fc(F_LIGHT_BLUE) << setw(15) << left << bin_1 << setw(15) << left << bin_2 << setw(15) << left << sd << setw(15) << left << result << setw(15) << left << i << fc::Reset << endl;
+		if (bin_1.bin[i] == '1' && bin_2.bin[i] == '1')
+		{
+			result[i] = (sd == 1) ? '1' : '0';
+			sd = 1;
+		}
+		else if (bin_1.bin[i] == '0' && bin_2.bin[i] == '0')
+		{
+			result[i] = (sd == 1) ? '1' : '0';
+			sd = 0;
+		}
+		else
+		{
+			result[i] = (sd == 1) ? '0' : '1';
+			if (result[i] == '1') sd = 0;
+			else sd = 1;
+		}
+		cout << fc(F_LIGHT_BLUE) << setw(15) << left << bin_1[0] << setw(15) << left << bin_2[0] << setw(15) << left << sd << setw(15) << left << result << setw(15) << left << i << fc::Reset << endl;
+	}
+
+	cout << fc(F_LIGHT_CYAN) << "\nRESULT: " << Bin(result) << " (" << Bin(result).ToDecimal() << ')' << endl << fc::Reset;
+	delete[] result;
+}
+
+void Bin::SimulateManualSubtraction(Bin bin_1, Bin bin_2)
+{
+	int sd = 0;
+	char* result = new char[9] {"00000000"};
+
+	cout << fc(F_LIGHT_CYAN) << "==*== SIMULATE MANUAL SUBSTRACTION ==*==" << fc::Reset << endl;
+	cout << "Convert to 2's complement of the second number, then add two numbers." << endl;
+	cout << "TERM 1: " << fc(F_LIGHT_RED) << bin_1.bin << " (" << bin_1.ToDecimal() << ')' << fc::Reset << endl;
+	cout << "TERM 2: " << fc(F_LIGHT_RED) << ~bin_2 + Bin(1) << " (" << bin_2.ToDecimal() << ')' << fc::Reset << endl;
+	bin_2 = ~bin_2 + Bin(1);
+	cout << fc(F_LIGHT_YELLOW) << setw(15) << left << "A" << setw(15) << left << "B" << setw(15) << left << "Cin" << setw(15) << left << "Sum" << setw(15) << left << "Cout" << fc::Reset << endl;
+	for (int i = 7; i >= 0; i--)
+	{
+		//cout << fc(F_LIGHT_BLUE) << setw(15) << left << bin_1 << setw(15) << left << bin_2 << setw(15) << left << sd << setw(15) << left << result << setw(15) << left << i << fc::Reset << endl;
+		if (bin_1.bin[i] == '1' && bin_2.bin[i] == '1')
+		{
+			result[i] = (sd == 1) ? '1' : '0';
+			sd = 1;
+		}
+		else if (bin_1.bin[i] == '0' && bin_2.bin[i] == '0')
+		{
+			result[i] = (sd == 1) ? '1' : '0';
+			sd = 0;
+		}
+		else
+		{
+			result[i] = (sd == 1) ? '0' : '1';
+			if (result[i] == '1') sd = 0;
+			else sd = 1;
+		}
+		cout << fc(F_LIGHT_BLUE) << setw(15) << left << bin_1[0] << setw(15) << left << bin_2[0] << setw(15) << left << sd << setw(15) << left << result << setw(15) << left << i << fc::Reset << endl;
+	}
+
+	cout << fc(F_LIGHT_CYAN) << "\nRESULT: " << Bin(result) << " (" << Bin(result).ToDecimal() << ')' << endl << fc::Reset;
+	delete[] result;
+}
 #pragma endregion
 
 

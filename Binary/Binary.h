@@ -36,6 +36,10 @@ public:
 	friend istream& operator>>(istream& in, Bin& _bin);
 	friend ostream& operator<<(ostream& out, const Bin& _bin);
 
+	static void SimulateManualDivision(Bin, Bin);
+	static void SimulateManualMultiplication(Bin, Bin);
+	static void SimulateManualAddition(Bin, Bin);
+	static void SimulateManualSubtraction(Bin, Bin);
 	//void AND(const Bin& other);
 	//void OR(const Bin& other);
 	//void XOR(const Bin& other);
