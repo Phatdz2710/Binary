@@ -23,6 +23,12 @@ int ToDecimal() const \\ Converts the binary number to its decimal equivalent
   + `~`  : Bitwise NOT
   + `[]` : Get bit by position
 
+* Static Function
+ + `SimulateManualAddition` : Simulate the process of adding two binary numbers by hand
+ + `SimulateManualSubstraction` : Simulate the process of substracting two binary numbers by hand
+ + `SimulateManualMultiplication` : Simulate the process of multiplying two binary numbers by hand
+ + `SimulateManualDivision` : Simulate the process of dividing two binary numbers by hand
+
 ## Examples
 ```c++
 #include "Binary.h"
