@@ -38,8 +38,9 @@ int main()
     Bin a(-15);
     Bin b("00101100");
     Bin c = a + b;
-    Bin c = a * b;
     cout << "Result: " << c;
+
+    Bin::SimulateManualMultiplication("10001000", "00010101");
     return 1;
 }
  
